@@ -80,6 +80,11 @@ namespace Chess
                 return false;
             }
 
+            if (figure is Knight)
+            {
+                return false;
+            }
+    
             // Bishop same-row move
             if (origin.x == destination.x && origin.x - destination.x > 1)
             {
@@ -90,7 +95,7 @@ namespace Chess
                     if (this.boardState[i][origin.y] != null)
                     {
                         // There is a piece that is in between therefore in this board state it is illegal.
-                        return false;
+                        return true;
                     }
                 }
             }
@@ -103,7 +108,7 @@ namespace Chess
                     if (this.boardState[origin.x][i] != null)
                     {
                         // There is a piece that is in between therefore in this board state it is illegal.
-                        return false;
+                        return true;
                     }
                 }
             }
@@ -136,7 +141,7 @@ namespace Chess
                     if (this.boardState[startPosition.x][startPosition.y] != null)
                     {
                         // This diagonal is obstructed and this move is illegal
-                        return false;
+                        return true;
                     }
                     startPosition.x += xDelta;
                     startPosition.y += yDelta;
@@ -146,7 +151,7 @@ namespace Chess
 
 
 
-            return true;
+            return false;
         }
 
         public bool CanMove(Position origin, Position destination)
@@ -203,13 +208,16 @@ namespace Chess
 
         }
 
-        public void Move(Position origin, Position destination)
+        public bool Move(Position origin, Position destination)
         {
             if (this.CanMove(origin, destination))
             {
                 this.boardState[destination.x][destination.y] = this.boardState[origin.x][origin.y];
                 this.boardState[origin.x][origin.y] = null;
+                return true;
             }
+
+            return false;
         }
 
         public Figure[][] GetBoardState()
@@ -217,6 +225,19 @@ namespace Chess
             return this.boardState;
         }
 
+        public bool IsOwnedBy(int xPosition, int yPosition, bool white)
+        {
+            if (!new Position(xPosition, yPosition).IsValidPosition(this.BoardSize))
+            {
+                return false;
+            }
+            if (this.boardState[xPosition][yPosition] == null)
+            {
+                return false;
+            }
+
+            return this.boardState[xPosition][yPosition].IsWhite == white;
+        }
     
         public int BoardSize { get; private set; }
 

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text;
+using Chess.Exceptions;
 
 namespace Chess
 {
@@ -46,16 +47,64 @@ namespace Chess
 
                 this.PrintBoard();
 
+                Console.Write("Waiting for Player {0}'s move: ", this.Player);
+                string positionFrom = Console.ReadLine();
+                positionFrom = positionFrom?.ToLower();
+                Console.Write("Move {0} to: ", positionFrom);
+                string positionTo = Console.ReadLine();
+                positionTo = positionTo?.ToLower();
 
-
-                string line = Console.ReadLine();
-                if (line == null || String.IsNullOrEmpty(line))
+                try
                 {
-                    break;
+                    Position origin = this.getPositionFromString(positionFrom);
+                    if (!this.board.IsOwnedBy(origin.x, origin.y, this.IsWhite))
+                    {
+                        throw new IllegalPositionException();
+                    }
+                    Position destination = this.getPositionFromString(positionTo);
+                    if (this.board.Move(origin, destination))
+                    {
+                        this.IsWhite = !this.IsWhite;
+                    }
+                    else
+                    {
+                        throw new IllegalPositionException();
+                    }
+
+                }
+                catch (IllegalPositionException e)
+                {
+                    Console.WriteLine("Illegal move: {0} to {1}", positionFrom, positionTo);
+                    Console.ReadKey();
                 }
 
-                
+           
             }
+        }
+
+        private Position getPositionFromString(string position)
+        {
+            if (position.Length != 2)
+            {
+                throw new IllegalPositionException();
+            }
+
+            char columnLetter = position[0];
+            char rowDigit = position[1];
+            if (!char.IsLetter(columnLetter))
+            {
+                throw new IllegalPositionException();
+            }
+
+            if (!char.IsDigit(rowDigit))
+            {
+                throw new IllegalPositionException();
+            }
+
+            int columnIndex = (columnLetter - 'a');
+            int rowIndex = this.board.BoardSize - (rowDigit - '0');
+
+            return new Position(rowIndex, columnIndex);
         }
 
         public void PrintBoard()
